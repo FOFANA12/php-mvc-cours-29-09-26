@@ -1,16 +1,7 @@
-<?php
-session_start();
-
-use App\Core\Database;
-
-require_once __DIR__ . '/../vendor/autoload.php';
-
-$pdo = Database::connect();
-
-$stmt = $pdo->prepare("SELECT * FROM todos");
-$stmt->execute();
-$todos = $stmt->fetchAll();
+<?php 
+    /** @var array $todos */ 
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -26,7 +17,7 @@ $todos = $stmt->fetchAll();
         <h1 class="h3 mb-4">Mes todos</h1>
 
         <div class="d-flex justify-content-end">
-            <a href="./create.php" class="btn btn-primary mb-3">Ajouter une todo</a>
+            <a href="/todos/create" class="btn btn-primary mb-3">Ajouter une todo</a>
         </div>
 
         <?php if (isset($_SESSION['alert'])) { ?>
@@ -49,8 +40,8 @@ $todos = $stmt->fetchAll();
                         <td><?= $todo['statut'] ? 'Terminé' : 'En cours' ?></td>
                         <td><?= $todo['created_at'] ?></td>
                         <td>
-                            <a href="./edit.php?id=<?= $todo['id'] ?>" class="btn btn-sm btn-warning">Modifier</a>
-                            <form action="./delete.php" method="POST" class="d-inline">
+                            <a href="/todos/edit?id=<?= $todo['id'] ?>" class="btn btn-sm btn-warning">Modifier</a>
+                            <form action="/todos/delete" method="POST" class="d-inline">
                                 <input type="hidden" name="id" value="<?= $todo['id'] ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
                             </form>

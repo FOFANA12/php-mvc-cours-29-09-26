@@ -1,22 +1,5 @@
-<?php
-session_start();
-
-use App\Core\Database;
-
-require_once __DIR__ . '/../vendor/autoload.php';
-
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-
-$pdo = Database::connect();
-$stmt = $pdo->prepare("SELECT * FROM todos WHERE id = :id");
-$stmt->execute(['id' => $id]);
-$todo = $stmt->fetch();
-
-if (!$todo) {
-    header('Location: ./index.php');
-    exit;
-}
-
+<?php 
+    /** @var array $todo */ 
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -38,7 +21,7 @@ if (!$todo) {
             </div>
         <?php } ?>
 
-        <form action="./update.php" method="POST">
+        <form action="/todos/update" method="POST">
             <input type="hidden" name="id" value="<?= $todo['id'] ?>">
             <div class="mb-3">
                 <label for="titre" class="form-label">Titre</label>
@@ -62,7 +45,7 @@ if (!$todo) {
                 <?php } ?>
             </div>
             <button type="submit" class="btn btn-primary">Modifier</button>
-            <a href="./index.php" class="btn btn-link">Retour</a>
+            <a href="/todos" class="btn btn-link">Retour</a>
         </form>
     </div>
 

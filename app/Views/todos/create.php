@@ -1,4 +1,3 @@
-<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -19,7 +18,7 @@
             </div>
         <?php } ?>
 
-        <form action="./store.php" method="POST">
+        <form action="/todos/create" method="POST">
             <div class="mb-3">
                 <label for="titre" class="form-label">Titre</label>
                 <input type="text" class="form-control <?= isset($_SESSION['errors']['titre']) ? 'is-invalid' : '' ?>" id="titre" name="titre"
@@ -41,7 +40,7 @@
                 <?php } ?>
             </div>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
-            <a href="./index.php" class="btn btn-link">Retour</a>
+            <a href="/todos" class="btn btn-link">Retour</a>
         </form>
     </div>
 
