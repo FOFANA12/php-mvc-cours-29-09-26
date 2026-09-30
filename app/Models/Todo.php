@@ -29,7 +29,7 @@ final class Todo
         $stmt = $db->prepare($sql);
 
         $stmt->execute([
-            'titre' => $data['titre'],
+            'titre' => trim($data['titre']),
             'statut' => $data['statut'] ?? 0,
         ]);
 
@@ -50,7 +50,7 @@ final class Todo
         $stmt = $db->prepare($sql);
 
         $stmt->execute([
-            'titre' => $data['titre'],
+            'titre' => trim($data['titre']),
             'statut' => $data['statut'],
             'id' => $id,
         ]);

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Core;
+
+use App\Core\Exeptions\DatabaseException;
 use Dotenv\Dotenv;
 use PDO;
 use PDOException;
@@ -24,7 +26,7 @@ final class Database
                 ]);
 
             } catch (PDOException $e) {
-                exit("Erreur de connexion " . $e->getMessage());
+                throw new DatabaseException("Connexion impossible", 0, $e);
             }
         }
 

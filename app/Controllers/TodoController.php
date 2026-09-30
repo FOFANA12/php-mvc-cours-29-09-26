@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Core\Exeptions\NotFoundException;
+use App\Core\Validator;
 use App\Models\Todo;
 
 class TodoController
@@ -9,12 +11,21 @@ class TodoController
     public function getAll(): void
     {
         $todos = Todo::getAll();
+
+        ob_start();
         require __DIR__ . '/../Views/todos/list.php';
+        $view = ob_get_clean();
+
+        require __DIR__ . '/../Views/layouts/app.php';
     }
+    
 
     public function getCreateForm(): void
     {
+        ob_start();
         require __DIR__ . '/../Views/todos/create.php';
+        $view = ob_get_clean();
+        require __DIR__ . '/../Views/layouts/app.php';
     }
 
     public function store(): void
@@ -24,33 +35,11 @@ class TodoController
             exit;
         }
 
-        $errors = [];
+        $validator = (new Validator($_POST))->required('titre')->min('titre', 5)->max('titre', 50)->required('statut');
 
-        $titre = trim(filter_input(INPUT_POST, 'titre')) ?? null;
-        $statut = isset($_POST['statut']);
-
-        if (is_null($titre)) {
-            $errors['titre'] = "Le titre est obligatoire";
-        } else {
-            if (strlen(trim($titre)) < 5) {
-                $errors['titre'] = "Le titre doit avoir au moins 5 caractères";
-            }
-
-            if (strlen(trim($titre)) > 50) {
-                $errors['titre'] = "Le titre ne pas être plus de 50 caractères";
-            }
-        }
-
-        if (!$statut) {
-            $errors['statut'] = "Le statut est obligatoire";
-        }
-
-        if (count($errors) > 0) {
-            $_SESSION['errors'] = $errors;
-            $_SESSION['old']['titre'] = $titre;
-            if ($statut) {
-                $_SESSION['old']['statut'] = $statut;
-            }
+        if ($validator->fails()) {
+            $_SESSION['errors'] = $validator->getErrors();
+            $_SESSION['old'] = $_POST;
 
             $_SESSION['alert'] = [
                 'type' => 'danger',
@@ -60,10 +49,7 @@ class TodoController
             header('Location: /todos/create');
             exit;
         } else {
-            $todoId = Todo::create([
-                'titre' => $titre,
-                'statut' => (int) $statut
-            ]);
+            $todoId = Todo::create($_POST);
 
             if ($todoId) {
                 unset($_SESSION['errors'], $_SESSION['old']);
@@ -87,15 +73,19 @@ class TodoController
         }
     }
 
+    
     public function getEditForm(): void
     {
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         $todo = Todo::findById($id);
         if (!$todo) {
-            header('Location: /todos');
-            exit;
+            throw new NotFoundException("Todo #$id introuvable");
         }
+
+        ob_start();
         require __DIR__ . '/../Views/todos/edit.php';
+        $view = ob_get_clean();
+        require __DIR__ . '/../Views/layouts/app.php';
     }
 
     public function update(): void
@@ -112,33 +102,11 @@ class TodoController
             exit;
         }
 
-        $errors = [];
+        $validator = (new Validator($_POST))->required('titre')->min('titre', 5)->max('titre', 50)->required('statut');
 
-        $titre = trim(filter_input(INPUT_POST, 'titre')) ?? null;
-        $statut = isset($_POST['statut']);
-
-        if (is_null($titre)) {
-            $errors['titre'] = "Le titre est obligatoire";
-        } else {
-            if (strlen(trim($titre)) < 5) {
-                $errors['titre'] = "Le titre doit avoir au moins 5 caractères";
-            }
-
-            if (strlen(trim($titre)) > 50) {
-                $errors['titre'] = "Le titre ne pas être plus de 50 caractères";
-            }
-        }
-
-        if (!$statut) {
-            $errors['statut'] = "Le statut est obligatoire";
-        }
-
-        if (count($errors) > 0) {
-            $_SESSION['errors'] = $errors;
-            $_SESSION['old']['titre'] = $titre;
-            if ($statut) {
-                $_SESSION['old']['statut'] = $statut;
-            }
+        if ($validator->fails()) {
+            $_SESSION['errors'] = $validator->getErrors();
+            $_SESSION['old'] = $_POST;
 
             $_SESSION['alert'] = [
                 'type' => 'danger',
@@ -148,13 +116,7 @@ class TodoController
             header('Location: /todos/edit?id=' . $id);
             exit;
         } else {
-            Todo::update(
-                [
-                    'titre' => $titre,
-                    'statut' => (int) $statut,
-                ],
-                $id
-            );
+            Todo::update($_POST, $id);
 
             unset($_SESSION['errors'], $_SESSION['old']);
 
